@@ -1,17 +1,11 @@
 pipeline {
     agent {
         docker {
-            image 'your-docker-image-with-kubectl'
+            image 'alpine/k8s:1.24.12'
         }
     }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/your/repository.git'
-            }
-        }
-        
         stage('Compile .NET Core Application') {
             steps {
                 sh 'dotnet build'
