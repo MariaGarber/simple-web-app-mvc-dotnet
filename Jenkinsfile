@@ -1,37 +1,53 @@
 pipeline {
-    agent any
+    agent none
 
     stages {
         stage('Build') {
             agent {
-                docker {
-                    image 'dotnet'
-                }
+                label 'docker'
             }
             steps {
-                sh 'dotnet build'
+                container('dotnet') {
+                    sh 'dotnet build'
+                }
             }
         }
 
         stage('Publish') {
             agent {
-                docker {
-                    image 'dotnet'
-                }
+                label 'docker'
             }
             steps {
-                sh 'dotnet publish -o ./publish'
+                container('dotnet') {
+                    sh 'dotnet publish -o ./publish'
+                }
             }
         }
 
         stage('Upload') {
             agent {
-                docker {
-                    image 'kubectl'
-                }
+                label 'docker'
             }
             steps {
-                sh 'kubectl cp ./publish web-app:/var/web-app -n default'
+                container('kubectl') {
+                    sh 'kubectl cp ./publish web-app:/var/web-app -n default'
+                }
+            }
+        }
+    }
+
+    // Define the pod template for running containers
+    options {
+        podTemplate {
+            containers {
+                container('dotnet') {
+                    image 'dotnet'
+                    ttyEnabled true
+                }
+                container('kubectl') {
+                    image 'kubectl'
+                    ttyEnabled true
+                }
             }
         }
     }
