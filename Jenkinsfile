@@ -1,14 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            cloud 'kubernetes'
+            label 'my-kubernetes-agent'
+        }
+    }
 
     stages {
         stage('Compile .NET Core Application') {
-            agent {
-                kubernetes {
-                    namespace 'devops'
-                }
-            }
-
             steps {
                 container('dotnet') {
                     sh 'dotnet build'
@@ -17,12 +16,6 @@ pipeline {
         }
 
         stage('Upload Application') {
-            agent {
-                kubernetes {
-                    namespace 'maria'
-                }
-            }
-
             steps {
                 container('kubectl') {
                     sh 'kubectl apply -f deployment.yaml'
