@@ -1,33 +1,31 @@
 pipeline {
     agent any
-    
+
     stages {
-        stage('Compile Application') {
-            environment {
-                KUBECONFIG = credentials('your_kubeconfig_credentials_id')
+        stage('Compile .NET Core Application') {
+            agent {
+                kubernetes {
+                    namespace 'devops'
+                }
             }
+
             steps {
-                container('kubectl') {
-                    sh '''
-                        kubectl config use-context your-source-namespace
-                        kubectl apply -f your-compilation-resources.yaml
-                        # Additional compilation steps if needed
-                    '''
+                container('dotnet') {
+                    sh 'dotnet build'
                 }
             }
         }
-        
+
         stage('Upload Application') {
-            environment {
-                KUBECONFIG = credentials('your_kubeconfig_credentials_id')
+            agent {
+                kubernetes {
+                    namespace 'maria'
+                }
             }
+
             steps {
                 container('kubectl') {
-                    sh '''
-                        kubectl config use-context your-destination-namespace
-                        kubectl apply -f your-upload-resources.yaml
-                        # Additional upload steps if needed
-                    '''
+                    sh 'kubectl apply -f deployment.yaml'
                 }
             }
         }
