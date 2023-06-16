@@ -1,28 +1,37 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Build') {
-            steps {
-                container('dotnet') {
-                    sh 'dotnet build'
+            agent {
+                docker {
+                    image 'dotnet'
                 }
             }
+            steps {
+                sh 'dotnet build'
+            }
         }
-        
+
         stage('Publish') {
-            steps {
-                container('dotnet') {
-                    sh 'dotnet publish -o ./publish'
+            agent {
+                docker {
+                    image 'dotnet'
                 }
             }
-        }
-        
-        stage('Upload') {
             steps {
-                container('kubectl') {
-                    sh 'kubectl cp ./publish web-app:/var/web-app -n default'
+                sh 'dotnet publish -o ./publish'
+            }
+        }
+
+        stage('Upload') {
+            agent {
+                docker {
+                    image 'kubectl'
                 }
+            }
+            steps {
+                sh 'kubectl cp ./publish web-app:/var/web-app -n default'
             }
         }
     }
