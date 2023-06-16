@@ -1,25 +1,26 @@
 pipeline {
     agent {
-        kubernetes {
-            cloud 'kubernetes'
-            label 'my-kubernetes-agent'
+        docker {
+            image 'your-docker-image-with-kubectl'
         }
     }
 
     stages {
-        stage('Compile .NET Core Application') {
+        stage('Clone Repository') {
             steps {
-                container('dotnet') {
-                    sh 'dotnet build'
-                }
+                git 'https://github.com/your/repository.git'
             }
         }
-
+        
+        stage('Compile .NET Core Application') {
+            steps {
+                sh 'dotnet build'
+            }
+        }
+        
         stage('Upload Application') {
             steps {
-                container('kubectl') {
-                    sh 'kubectl apply -f deployment.yaml'
-                }
+                sh 'kubectl apply -f deployment.yaml --namespace maria'
             }
         }
     }
