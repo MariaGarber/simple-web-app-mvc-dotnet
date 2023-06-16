@@ -2,12 +2,6 @@ pipeline {
     agent any
     
     stages {
-        stage('Clone') {
-            steps {
-                git 'https://github.com/MariaGarber/simple-web-app-mvc-dotnet'
-            }
-        }
-
         stage('Build') {
             steps {
                 container('dotnet') {
