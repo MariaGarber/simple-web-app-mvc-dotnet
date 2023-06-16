@@ -1,34 +1,40 @@
 pipeline {
-    agent any
-    
+    agent none
+
     stages {
-        stage('Clone') {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'dotnet'
+                    label 'docker'
+                }
+            }
             steps {
-                git 'https://github.com/MariaGarber/simple-web-app-mvc-dotnet'
+                sh 'dotnet build'
             }
         }
 
-        stage('Build') {
-            steps {
-                container('dotnet') {
-                    sh 'dotnet build'
-                }
-            }
-        }
-        
         stage('Publish') {
-            steps {
-                container('dotnet') {
-                    sh 'dotnet publish -o ./publish'
+            agent {
+                docker {
+                    image 'dotnet'
+                    label 'docker'
                 }
             }
-        }
-        
-        stage('Upload') {
             steps {
-                container('kubectl') {
-                    sh 'kubectl cp ./publish web-app:/var/web-app -n default'
+                sh 'dotnet publish -o ./publish'
+            }
+        }
+
+        stage('Upload') {
+            agent {
+                docker {
+                    image 'kubectl'
+                    label 'docker'
                 }
+            }
+            steps {
+                sh 'kubectl cp ./publish web-app:/var/web-app -n default'
             }
         }
     }
