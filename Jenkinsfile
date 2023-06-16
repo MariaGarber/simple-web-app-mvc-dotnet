@@ -12,14 +12,14 @@ pipeline {
         stage('Restore Packages') {
             steps {
                 // Restore NuGet packages
-                bat 'nuget restore'
+                sh 'dotnet restore'
             }
         }
         
         stage('Build') {
             steps {
                 // Build the .NET application using MSBuild
-                bat 'msbuild /t:Build /p:Configuration=Release'
+                sh 'dotnet build --configuration Release'
             }
         }
     }
