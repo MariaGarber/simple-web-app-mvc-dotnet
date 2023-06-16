@@ -1,11 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'alpine/k8s:1.24.12'
-        }
-    }
+    agent any
 
     stages {
+        stage('Try'){
+            steps {
+                docker.image('ubuntu1804').withRun('-d=true -p 8888:8080') {c -> docker.image('ubuntu1804').inside{sh "ls"}}
+            }
+        }
+        
         stage('Compile .NET Core Application') {
             steps {
                 sh 'dotnet build'
