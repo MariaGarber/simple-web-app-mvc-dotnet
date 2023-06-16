@@ -1,40 +1,34 @@
 pipeline {
-    agent none
-
+    agent any
+    
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'dotnet'
-                    label 'docker'
-                }
+        stage('Compile Application') {
+            environment {
+                KUBECONFIG = credentials('your_kubeconfig_credentials_id')
             }
             steps {
-                sh 'dotnet build'
+                container('kubectl') {
+                    sh '''
+                        kubectl config use-context your-source-namespace
+                        kubectl apply -f your-compilation-resources.yaml
+                        # Additional compilation steps if needed
+                    '''
+                }
             }
         }
-
-        stage('Publish') {
-            agent {
-                docker {
-                    image 'dotnet'
-                    label 'docker'
-                }
+        
+        stage('Upload Application') {
+            environment {
+                KUBECONFIG = credentials('your_kubeconfig_credentials_id')
             }
             steps {
-                sh 'dotnet publish -o ./publish'
-            }
-        }
-
-        stage('Upload') {
-            agent {
-                docker {
-                    image 'kubectl'
-                    label 'docker'
+                container('kubectl') {
+                    sh '''
+                        kubectl config use-context your-destination-namespace
+                        kubectl apply -f your-upload-resources.yaml
+                        # Additional upload steps if needed
+                    '''
                 }
-            }
-            steps {
-                sh 'kubectl cp ./publish web-app:/var/web-app -n default'
             }
         }
     }
