@@ -1,22 +1,25 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Try'){
+        stage('Checkout') {
             steps {
-                docker.image('ubuntu1804').withRun('-d=true -p 8888:8080') {c -> docker.image('ubuntu1804').inside{sh "ls"}}
+                // Checkout your source code from the repository
+                git 'https://github.com/MariaGarber/simple-web-app-mvc-dotnet'
             }
         }
         
-        stage('Compile .NET Core Application') {
+        stage('Restore Packages') {
             steps {
-                sh 'dotnet build'
+                // Restore NuGet packages
+                bat 'nuget restore'
             }
         }
         
-        stage('Upload Application') {
+        stage('Build') {
             steps {
-                sh 'kubectl apply -f deployment.yaml --namespace maria'
+                // Build the .NET application using MSBuild
+                bat 'msbuild /t:Build /p:Configuration=Release'
             }
         }
     }
